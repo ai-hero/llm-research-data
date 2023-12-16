@@ -14,9 +14,9 @@ class MMLUDataTransformer:
     def __init__(self):
         self.prompt_template_str = """<identity>You are an agent that helps answer multiple choice questions.</identity>
 <schema>
-question = ""
-choices = []
-answer = ""
+question:str = ""
+choices:list[str] = []
+answer:str = ""
 </schema>
 <data>
 question = {{question | dumps}}
@@ -29,10 +29,12 @@ assert answer >= 0 and answer < len(choices), "Answer must be a valid choice"
 </test>
 <actions>""".strip()
         self.completion_template_str = """
-    <do>set `answer` using gpt knowledge</do>
+  <action>
+    <do>set `answer` using GPT knowledge</do>
     <step>
     answer = {{answer}}
     </step>
+  </action>
 </actions>""".strip()
 
         # Setup Jinja2 environment
