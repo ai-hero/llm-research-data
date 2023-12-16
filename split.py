@@ -24,10 +24,21 @@ def split(
 
     # Split the dataset
     print("Splitting the dataset")
-    train_testvalid = dataset["train"].train_test_split(train_size=train_size)
-    test_valid = train_testvalid["test"].train_test_split(
-        test_size=test_size / (test_size + val_size)
-    )
+    if "test" not in dataset:
+        train_testvalid = dataset["train"].train_test_split(train_size=train_size)
+        test_valid = train_testvalid["test"].train_test_split(
+            test_size=test_size / (test_size + val_size)
+        )
+        train_split = train_testvalid["train"]
+        val_split = test_valid["train"]
+        test_split = test_valid["test"]
+    else:
+        test_valid = dataset["test"].train_test_split(
+            test_size=test_size / (test_size + val_size)
+        )
+        train_split = dataset["train"]
+        val_split = test_valid["train"]
+        test_split = test_valid["test"]
 
     # Create output directory if it doesn't exist
     if not os.path.exists(output_dir):
@@ -36,9 +47,9 @@ def split(
     print(f"Converting {dataset_name} ad splitting it into train/val/test")
     # Save the splits
     splits = {}
-    splits["train"] = train_testvalid["train"]
-    splits["val"] = test_valid["train"]
-    splits["test"] = test_valid["test"]
+    splits["train"] = train_split
+    splits["val"] = val_split
+    splits["test"] = test_split
 
     combined = DatasetDict(splits)
 

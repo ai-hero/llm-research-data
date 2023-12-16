@@ -18,7 +18,6 @@ question = ""
 choices = []
 answer = ""
 </schema>
-
 <data>
 question = {{question | dumps}}
 choices = {{choices | dumps}}
@@ -27,13 +26,14 @@ choices = {{choices | dumps}}
 <intent>Select the most correct answer</intent>
 <test>
 assert answer >= 0 and answer < len(choices), "Answer must be a valid choice"
-</test>"""
-        self.completion_template_str = """<actions>
-    <do>set answer using gpt knowledge</do>
+</test>
+<actions>""".strip()
+        self.completion_template_str = """
+    <do>set `answer` using gpt knowledge</do>
     <step>
     answer = {{answer}}
     </step>
-</actions>"""
+</actions>""".strip()
 
         # Setup Jinja2 environment
         self.env = Environment(loader=FileSystemLoader("."))
