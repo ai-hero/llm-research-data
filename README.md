@@ -13,3 +13,25 @@ We'll use HuggingFace Datasets as a target format. For each dataset we will assu
 - `mmlu.py` - Creates a multiple-choice Q&A dataset using the MMLU dataset (downloaded locally) 
 - `open_instruct.py` - Convert the `VMWare/open-instruct` dataset into the fine-tuning format above.
 - `yacheq.py` - for now, the autonomous agent research that AI Hero is undertaking is stored in this repo.
+
+## Setup
+
+### Requirements
+```sh
+pip install -r requirements.txt
+```
+
+### Environment
+You'll also need a `.env` file in the top folder from where you'll run the jobs.
+
+```
+# For loading/saving data to Huggingface
+HF_TOKEN=
+
+# For loading/saving data to S3
+S3_ENDPOINT=s3.amazonaws.com
+S3_ACCESS_KEY_ID=
+S3_SECRET_ACCESS_KEY=
+S3_REGION=us-east-2
+S3_SECURE=true
+```
