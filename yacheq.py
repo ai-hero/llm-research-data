@@ -14,22 +14,29 @@ from utils import DatasetMover
 class MMLUDataTransformer:
     def __init__(self):
         self.prompt_template_str = """<identity>You are an agent that helps answer multiple choice questions.</identity>
-<data>
-question:str = {{question | dumps}}
-choices:list[str] = {{choices | dumps}}
-answer:str = ""
-</data>
 <objective>Answer the question</objective>
-<intent>Select the most correct answer</intent>
-<test>
-assert answer in choices, "Answer must be a valid choice"
-</test>
-<actions>
-"""
+<data>
+this.data = {
+    "question": "{{question | dumps}}",
+    "choices": {{choices | dumps}},
+    "answer": ""
+}
+</data>
+<tests>
+if(!choices.includes(answer)){
+    console.error("Answer must be a valid choice")
+}else{
+    console.log("Answer is a valid choice")
+}
+</tests>
+<actions> 
+  <user>
+    <ask>Select the best answer.</ask>
+  </user>"""
         self.completion_template_str = """  <action>
     <do>set `answer` using GPT knowledge</do>
     <step>
-    answer = {{answer | dumps}}
+    this.data.answer = {{answer | dumps}}
     </step>
   </action>
 </actions>"""
@@ -64,16 +71,26 @@ assert answer in choices, "Answer must be a valid choice"
                     action_tag, action_details, remainder_actions = self._extract(
                         remainder_actions
                     )
-                    assert action_tag == "action"
-                    remainder_step_actions = action_details
-                    parsed_action_tags = {}
-                    while remainder_step_actions:
-                        # parse internal tags
-                        intag, step, remainder_step_actions = self._extract(
-                            remainder_step_actions
-                        )
-                        parsed_action_tags[intag] = step
-                    parsed_actions.append(parsed_action_tags)
+                    if action_tag == "action":
+                        remainder_step_actions = action_details
+                        parsed_action_tags = {}
+                        while remainder_step_actions:
+                            # parse internal tags
+                            intag, step, remainder_step_actions = self._extract(
+                                remainder_step_actions
+                            )
+                            parsed_action_tags[intag] = step
+                        parsed_actions.append(parsed_action_tags)
+                    elif action_tag == "user":
+                        remainder_step_actions = action_details
+                        parsed_action_tags = {}
+                        while remainder_step_actions:
+                            # parse internal tags
+                            intag, step, remainder_step_actions = self._extract(
+                                remainder_step_actions
+                            )
+                            parsed_action_tags[intag] = step
+                        parsed_actions.append(parsed_action_tags)
                 parsed[tag] = parsed_actions
             else:
                 parsed[tag] = content
@@ -108,13 +125,13 @@ assert answer in choices, "Answer must be a valid choice"
             # print("Testing code:")
             # print(code)
             # print("----------")
-            exec(code)
+            # exec(code)
             return True
         except Exception:
             traceback.print_exc()
             return False
 
-    def transform(self, row):
+    def transform(self, row: dict):
         return {
             "prompt": self.prompt_template.render(**row),
             "completion": self.completion_template.render(**row),
@@ -162,7 +179,7 @@ def gen(split="dev"):
 
 
 if __name__ == "__main__":
-    dataset_name = "llmos"
+    dataset_name = "yacheq"
     dotenv.load_dotenv()
     mmlu_data = Path.home() / "data" / "mmlu"
     assert mmlu_data.exists()
@@ -177,10 +194,16 @@ if __name__ == "__main__":
     combined = DatasetDict(splits)
     dataset_info = DatasetInfo(
         description="Contains MMLU dataset where the answer is entirely in text. Schema is part of data",
-        version="0.2.0",
+        version="0.3.0",
     )
     for split, dataset in combined.items():
         dataset.dataset_info = dataset_info
+
+    for split in splits:
+        print(f"Example in split {split}:")
+        for row in splits[split]:
+            print(row)
+            break
 
     current_directory = Path(".")
     shutil.rmtree(current_directory / "dataset", ignore_errors=True)

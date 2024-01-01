@@ -14,9 +14,17 @@ from utils import DatasetMover
 class MMLUDataTransformer:
     def transform(self, row):
         prompt = f"{row[0]}\n"
-        for option, choice in zip(["A", "B", "C", "D"], row[1:5]):
+        choices = row[1:5]
+        for option, choice in zip(["A", "B", "C", "D"], choices):
             prompt += f"{option}. {choice}\n"
-        completion = row[5]
+
+        lookup = {
+            "A": 0,
+            "B": 1,
+            "C": 2,
+            "D": 3,
+        }
+        completion = choices[lookup[row[5]]]
         return {
             "prompt": prompt,
             "completion": completion,
@@ -63,6 +71,12 @@ if __name__ == "__main__":
     )
     for split, dataset in combined.items():
         dataset.dataset_info = dataset_info
+
+    for split in splits:
+        print(f"Example in split {split}:")
+        for row in splits[split]:
+            print(row)
+            break
 
     current_directory = Path(".")
     shutil.rmtree(current_directory / "dataset", ignore_errors=True)

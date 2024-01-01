@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 import os
-from datasets import DatasetDict, DatasetInfo
+from datasets import Dataset, DatasetDict, DatasetInfo
 from datasets import load_dataset
 from fire import Fire
 from numpy import dot
@@ -20,9 +20,10 @@ def split(
 ):
     print(f"Loading {dataset_name}")
     dataset = load_dataset(dataset_name)
+    new_dataset = []
     for row in dataset["train"]:
-        row["prompt"] = row["alpaca_prompt"]
-        row["completion"] = row["response"]
+        row["prompt"] = row["alpaca_prompt"].strip()
+        row["completion"] = row["response"].strip()
         for to_delete in [
             "alpaca_prompt",
             "response",
@@ -31,7 +32,18 @@ def split(
             "template_type",
         ]:
             row.pop(to_delete)
+        new_dataset.append(row)
+
     short_name = dataset_name.split("/")[-1]
+    # Create a Dataset from your list of dictionaries
+    new_dataset = Dataset.from_list(new_dataset)
+
+    # If you're creating a new dataset from scratch:
+    dataset = DatasetDict(
+        {
+            "train": new_dataset  # Assign the new dataset as the train split
+        }
+    )
 
     # Split the dataset
     print("Splitting the dataset")
@@ -61,6 +73,12 @@ def split(
     splits["train"] = train_split
     splits["val"] = val_split
     splits["test"] = test_split
+
+    for split in splits:
+        print(f"Example in split {split}:")
+        for row in splits[split]:
+            print(row)
+            break
 
     combined = DatasetDict(splits)
     dataset_info = DatasetInfo(
