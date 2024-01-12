@@ -25,7 +25,8 @@ def split(
     new_dataset = []
     for row in dataset["train"]:
         text = row["text"].strip()
-        SPLITTER = "### Response: "
+        text = text.replace("###", "\n###").strip()
+        SPLITTER = "### Response:"
         row["prompt"] = text[: text.index(SPLITTER) + len(SPLITTER)]
         row["completion"] = text[text.index(SPLITTER) + len(SPLITTER) :]
         for to_delete in [
