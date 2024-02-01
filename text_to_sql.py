@@ -73,7 +73,7 @@ def split(
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    print(f"Converting {dataset_name} ad splitting it into train/val/test")
+    print(f"Converting {dataset_name} and splitting it into train/val/test")
     # Save the splits
     splits = {}
     splits["train"] = train_split
