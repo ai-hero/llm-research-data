@@ -24,7 +24,7 @@ def split(
     splits = {}
     all_sectors = set()
     all_pillars = set()
-    for split in ["test"]:  # "train", "validation",
+    for split in ["train", "validation", "test"]:  #
         print(f"Building for {split}")
         new_rows = []
         dataset_split = load_dataset(dataset_name, split=split)
