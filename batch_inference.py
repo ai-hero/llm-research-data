@@ -76,5 +76,19 @@ def split(
     dataset_mover.upload(folder_to_compress, output_tar_file, bucket_name)
 
 
+def get_output(
+    short_name="open-instruct-inference",
+    output_dir="dataset",
+):
+    dataset_mover = DatasetMover()
+    current_directory = Path(".")
+    shutil.rmtree(current_directory / output_dir, ignore_errors=True)
+    os.mkdir(current_directory / output_dir)
+    dataset_path = (current_directory / output_dir / short_name).as_posix()
+    dataset_mover.download(
+        "fine-tuning-research", f"{short_name}-output.tar.gz", dataset_path
+    )
+
+
 if __name__ == "__main__":
-    Fire(split)
+    Fire(get_output)

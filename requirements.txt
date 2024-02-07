@@ -1,3 +1,4 @@
 datasets
 minio
 python-dotenv
+pandas
